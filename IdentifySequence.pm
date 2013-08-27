@@ -1,11 +1,11 @@
 package IdentifySequence;
 
-use Bio::Tools::Run::RemoteBlast;
 use warnings;
 use strict;
 use Bio::Seq;
 use Bio::SeqIO;
 use Bio::SearchIO;
+use Bio::Tools::Run::RemoteBlast;
 
 sub new {
     my ( $class, %arg ) = @_;
@@ -16,7 +16,8 @@ sub new {
         _e_val       => $arg{e_val}       || "1e-10",
         _method      => $arg{method}      || "BLAST",
         _program     => $arg{program}     || "blastn",
-        _percentIden => $arg{percentIden} || 75
+        _percentIden => $arg{percentIden} || 75,
+        _outputSpeciesfile  => "annotateSpecies.fasta"
     }, $class;
     return $self;
 }
@@ -28,6 +29,7 @@ sub get_e_val       { $_[0]->{_e_val} }
 sub get_method      { $_[0]->{_method} }
 sub get_program     { $_[0]->{_program} }
 sub get_percentIden { $_[0]->{_percentIden} }
+sub get_outputSpeciesfile { $_[0]->{_outputSpeciesfile} }
 
 sub set_inputName {
     my ( $self, $inputName ) = @_;
@@ -64,6 +66,12 @@ sub set_percentIden {
     $self->{_percentIden} = $percentIden if $percentIden;
 }
 
+sub set_outputSpeciesfile {
+    my ( $self, $outputSpeciesfile ) = @_;
+    $self->{_outputSpeciesfile} = $outputSpeciesfile if $outputSpeciesfile;
+}
+
+
 sub SearchBlast {
     my $inputName = $_[0]->{_inputName};
     my $pathName  = $_[0]->{_pathName};
@@ -82,8 +90,6 @@ sub SearchBlast {
 
     #$v is just to turn on and off the messages
     my $v = 1;
-
-    print $fullName;
 
     my $str = Bio::SeqIO->new( -file => $fullName, -format => 'fasta' );
     while ( my $input = $str->next_seq() ) {
@@ -113,9 +119,9 @@ sub SearchBlast {
 
                     #save the output
                     my $filename = $result->query_name() . "\.bls";
-                    $factory->save_output(
-                        $pathName . 'conBlast/' . $filename );
+                    $factory->save_output($pathName . 'conBlast/' . $filename );
                     $factory->remove_rid($rid);
+                    
                     print "\nQuery Name: ", $result->query_name(), "\n";
 
                     while ( my $hit = $result->next_hit ) {
@@ -132,12 +138,9 @@ sub SearchBlast {
                 }
             }
         }
-        my $CheckFilename
-            = $pathName . 'conBlast/' . $input->display_id . '.bls';
+        my $CheckFilename = $pathName . 'conBlast/' . $input->display_id . '.bls';
         if ( -e $CheckFilename ) {
-
             # print "File  $CheckFilename have";
-
         }
         else {
             print "File  $CheckFilename Exits redo";
@@ -155,12 +158,19 @@ sub SearchBlast {
 
 }
 
-# Annotate get output file name is Anno*<filename>.fasta
-# seqio_output is for file output name is Anno*<filename>.fasta.
+
+
+###############################
+#function Annotate file from blast's file.
+#argument 1 is inputfile
+#argument 2 is pathName
+#argument 3 is percent identity from use
+#return file Anno<filename>.fasta
+###############################
 
 sub Annotate {
 
-    my $inputFile       = $_[0]->{_inputName};
+    my $inputFile       = $_[0]->{_outputSpeciesfile};
     my $pathName        = $_[0]->{_pathName};
     my $outputFile      = $pathName . $inputFile;
     my $percentIdentity = $_[0]->{_percentIden};

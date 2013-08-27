@@ -8,28 +8,26 @@ use warnings;
 use strict;
 
 my $filename ='testfile2.fasta';
-my $pathname = './UserData/7/';
+my $pathname = '../UserData/8/';
 #my $filename = $ARGV[0];
 #my $pathname = $ARGV[1];
-print 'first';
+# print 'first';
 
 my $IdentifySpe = IdentifySequence->new(
 				inputName 	=> 	$filename,
 				pathName 	=>	$pathname);
-$IdentifySpe->SearchBlast;
+# $IdentifySpe->SearchBlast;
 $IdentifySpe->Annotate;
 
 my $IdentifyAllele = IdentifyAllele->new(
-					inputName 	=> 	'Anno'.$filename,
+					inputName 	=> 	"annotateSpecies.fasta",
 					pathName 	=>	$pathname,
 					dblistName	=> "DBMlstUse.txt");
 $IdentifyAllele->searchInMLST;
 
-
 print "\n",'second';
-print "\n",'MlstAnno'.$filename."\nthird";
 
-my $combine = CombineAllele->new(	inputName 	=> 	'MlstAnno'.$filename,
+my $combine = CombineAllele->new(	inputName 	=> 	"knownMlst.fasta",
 									pathName 	=>	$pathname);
 my $combineOut = $combine->makeCombineAllele;
 

@@ -15,7 +15,7 @@ sub new {
         _inputName => $arg{inputName} || "no input filename",
         _pathName  => $arg{pathName}  || "No path name",
         _tree      => $arg{tree}      || "DBMlstUse",
-        _fileOutputCombine => "alegicProfile.txt"
+        _fileOutputCombine => "allelicProfile.txt"
     }, $class;
 
     return $self;
@@ -115,8 +115,14 @@ sub makeCombineAllele {
 
 }
 
+
+#######################################
 #make file have argument is alegicProfile.
-#output file name is alegicProfile.txt.
+#argument 1 is treefile
+#argument 2 is pathName
+#argument 3 is filename
+#output file name is allelicProfile.txt.
+#######################################
 sub makeTreeFile {
 
     my $tree     = $_[0];

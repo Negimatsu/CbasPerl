@@ -15,11 +15,12 @@ use Bio::SearchIO;
 sub new {
     my ( $class, %arg ) = @_;
     my $self = bless {
-        _inputName  => $arg{inputName}  || "no input filename",
-        _pathName   => $arg{pathName}   || "No path name",
-        _dblistName => $arg{dblistName} || "DBMlstUse.txt",
-        _seqio_output => "",
-        _fileDBname   => $arg{fileDBname} || ""
+        _inputName      => $arg{inputName}  || "no input filename",
+        _pathName       => $arg{pathName}   || "No path name",
+        _dblistName     => $arg{dblistName} || "DBMlstUse.txt",
+        _file_output    => "knownMlst.fasta",
+        _fileUnknown    => "unknown.fasta",
+        _fileDBname     => $arg{fileDBname} || ""
     }, $class;
     return $self;
 }
@@ -27,8 +28,9 @@ sub new {
 sub get_inputName    { $_[0]->{_inputName} }
 sub get_pathName     { $_[0]->{_pathName} }
 sub get_dblistName   { $_[0]->{_dblistName} }
-sub get_seqIO_output { $_[0]->{_seqIO_output} }
+sub get_file_output  { $_[0]->{_seqIO_output} }
 sub get_fileDBname   { $_[0]->{_fileDBname} }
+sub get_fileUnknown   { $_[0]->{_fileUnknown} }
 
 sub set_inputName {
     my ( $self, $inputName ) = @_;
@@ -45,14 +47,19 @@ sub set_dblistName {
     $self->{_dblistName} = $dblistName if $dblistName;
 }
 
-sub set_seqIO_output {
-    my ( $self, $seqIO_output ) = @_;
-    $self->{_seqIO_output} = $seqIO_output if $seqIO_output;
+sub set_file_output {
+    my ( $self, $_file_output ) = @_;
+    $self->{_file_output} = $_file_output if $_file_output;
 }
 
 sub set_fileDBname {
     my ( $self, $fileDBname ) = @_;
     $self->{_fileDBname} = $fileDBname if $fileDBname;
+}
+
+sub set_fileUnknown {
+    my ( $self, $fileUnknown ) = @_;
+    $self->{_fileUnknown} = $fileUnknown if $fileUnknown;
 }
 
 #####Sample arguments#########
@@ -70,13 +77,16 @@ my $header
     = "Pasteurella multocida subsp. multocida str. HN06, complete genome";
 
 my $numresults = 3;
-##############################
-sub searchInMLST {
+
 ##############~~~~~~~~~~~~~Main function~~~~~~~~~~~##################
+sub searchInMLST {
+
     #filename is $inputFile.
     my $inputFile = $_[0]->{_inputName};
     my $pathName  = $_[0]->{_pathName};
     my $DFile     = $pathName . $inputFile;
+    my $fileOutput = $_[0]->{_file_output};
+
 
     my @namefile = split /\./, $inputFile;
     my $inSeq    = $namefile[0];
@@ -87,7 +97,7 @@ sub searchInMLST {
     print $seqio->file;
 
     my $seqio_output = Bio::SeqIO->new(
-        -file   => '>' . $pathName . '/Mlst' . $inSeq . '.fasta',
+        -file   => '>' . $pathName . '/$fileOutput',
         -format => 'fasta'
     );
 
@@ -104,7 +114,7 @@ sub searchInMLST {
         print "I will use database name is $NameDB\n";
 
         #get DB mlst name  and name profile
-        my ( $nameFrMlst, $DBname ) = connectMlst( $NameDB, $sequence, );
+        my ( $nameFrMlst, $DBname ) = connectMlst( $NameDB, $pseq );
         my $AnnoMlst =  $nameFrMlst->{'locus'} . "-"
                         . $nameFrMlst->{'id'}
                         . "|DB $DBname ";
@@ -122,6 +132,7 @@ sub searchInMLST {
 }
 ##########~~~~~~~~~~~~~Main function~~~~~~~~~~~############
 
+
 ###function findNameDb is will be return DB name argument is header fasta file.
 sub findNameDB {
 
@@ -133,8 +144,6 @@ sub findNameDB {
     foreach my $line (<INFO>) {
         my @liness = split /,/, $line;
 
-        #print $liness[0]."\n";
-        # print $line;
         $DBnamesHashB{ $liness[0] } = $liness[1];
         $DBspeciHashB{ $liness[1] } = $liness[0];
         push( @DBnames, $liness[0] );
@@ -181,11 +190,9 @@ sub findNameDB {
     elsif ( $pickName ne "" ) {
         $DBnameUseSearch = $pickName;
     }
-
-    #print "use database name". $DBnameUseSearch;
-
     return $DBnameUseSearch;
 }
+
 
 ###############################
 #function Search from DB Mlst.
@@ -193,11 +200,13 @@ sub findNameDB {
 #argument 2 is name Sequence for search
 #argument 3 is locus ex adk ,gdh .
 ###############################
-
 sub connectMlst {
     my $searchDBname  = $_[0];
-    my $sequnceSearch = $_[1];
-    my $locus         = $_[2];
+    my $pseq          = $_[1];
+    my @display_id  = split /-/, $pseq->display_id;
+    my $locus = $display_id[0];
+    my $sequnceSearch = $pseq->seq();
+
 
     my $nameAllelic;
     my $database = $searchDBname;
@@ -205,7 +214,7 @@ sub connectMlst {
     if ( !$database ) {
         foreach my $DBname ( keys my %DBnamesHashB ) {
             $sequnceSearch = $DBname;
-            $nameAllelic = searchInPubMlstSOAP( $database, $sequnceSearch );
+            $nameAllelic = searchInPubMlstSOAP( $database, $sequnceSearch , $pseq);
         }
     }
     else {
@@ -221,10 +230,12 @@ sub connectMlst {
 #connect with pubmlst database 
 #argument 1 is name databasename in file DBmlstUse.txt Ex pmultocida_rirdc,Pasteurella multocida use pmultocida_rirdc
 #argument 2 is name Sequence for search
+#argument 3 is fasta sequence for file have unknown.
 ###############################
 sub searchInPubMlstSOAP{
     my $databaseName   =   $_[0];
     my $sequenceSearch =   $_[1];
+    my $pseq           =   $_[2];
     my $soap        = SOAP::Lite -> uri('http://pubmlst.org/MLST')
                                 ->proxy('http://pubmlst.org/cgi-bin/mlstdbnet/mlstFetch.pl');
     
@@ -243,8 +254,13 @@ sub searchInPubMlstSOAP{
                     . $t->{'alignment'} . '/'
                     . $t->{'length'}
                     . "\non  database name $database\n";
-            $nameFromMlst = $t;
-            last;
+            unless( $t->{'mismatches'} == 0 || $t->{'gaps'} == 0 || $t->{'alignment'} == $t->{'length'} ){
+                addUnknown($pseq);
+            }else{
+                $nameFromMlst = $t;    
+                last;
+            }         
+            
             }
         if ( !$soapResponse->valueof('//blastMatch') ) {
             $nameFromMlst = "Unknown";
@@ -257,6 +273,33 @@ sub searchInPubMlstSOAP{
         $soapResponse->faultstring;
         }    
     return $nameFromMlst;
+}
+
+
+sub addUnknown{
+    my $pseq = $_[0];
+    my $fileUnknown = $_[0]->{_fileUnknown};
+    my $pathName  = $_[0]->{_pathName};
+    my $DFile     = $pathName . $fileUnknown;
+    print $pseq;
+
+    my $seqio_output;
+    unless( -e $DFile){
+        $seqio_output = Bio::SeqIO->new(
+            -file   => '>$DFile',
+            -format => 'fasta' );
+    }else{
+         my $seq_obj = Bio::Seq->new(
+            -seq        => $pseq->seq(),
+            -display_id => $pseq->display_id,
+            -desc       => $pseq->desc ,
+            -alphabet   => "dna"
+        );
+
+        $seqio_output->write_seq($seq_obj);
+    }
+
+    
 }
 
 1;
