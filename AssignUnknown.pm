@@ -103,7 +103,7 @@ sub compoundFile{
         -file   => $DUnKnown  );
 
     my $seqio_output = Bio::SeqIO->new(
-        -file   => '>' . $pathName . '/'.$fileOuput,
+        -file   => ">$pathName/$fileOuput",
         -format => 'fasta' );
 
     while ( my $pseq = $seqKnown->next_seq() ) {

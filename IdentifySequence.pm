@@ -113,8 +113,7 @@ sub SearchBlast {
                     print STDERR "." if ( $v > 0 );
                     sleep 5;
 
-                }
-                else {
+                } else {
                     my $result = $rc->next_result();
 
                     #save the output
@@ -170,10 +169,13 @@ sub SearchBlast {
 
 sub Annotate {
 
-    my $inputFile       = $_[0]->{_outputSpeciesfile};
+    my $inputFile       = $_[0]->{_inputName};
     my $pathName        = $_[0]->{_pathName};
     my $outputFile      = $pathName . $inputFile;
     my $percentIdentity = $_[0]->{_percentIden};
+    my $filnameeout     = $_[0]->{_outputSpeciesfile};
+    my $anntateFileout  = $pathName.$filnameeout;
+
 
     # inSeq is name file not have instance inputfile from user ;
     #my $inputFile = 'est.txt';
@@ -182,13 +184,13 @@ sub Annotate {
     my $inSeq    = $namefile[0];
     my $seqio    = new Bio::SeqIO(
         -format => 'fasta',
-        -file   => $outputFile
+        -file   => "$outputFile"
     );
 
     print $seqio->file;
 
     my $seqio_output = Bio::SeqIO->new(
-        -file   => '>' . $pathName . 'Anno' . $inSeq . '.fasta',
+        -file   => ">$anntateFileout",
         -format => 'fasta'
     );
 

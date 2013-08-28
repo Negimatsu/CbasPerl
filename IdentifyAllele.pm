@@ -86,7 +86,7 @@ sub searchInMLST {
     my $pathName  = $_[0]->{_pathName};
     my $DFile     = $pathName . $inputFile;
     my $fileOutput = $_[0]->{_file_output};
-
+    my $fileUnknown = $_[0]->{_fileUnknown};
 
     my @namefile = split /\./, $inputFile;
     my $inSeq    = $namefile[0];
@@ -97,9 +97,13 @@ sub searchInMLST {
     print $seqio->file;
 
     my $seqio_output = Bio::SeqIO->new(
-        -file   => '>' . $pathName . '/$fileOutput',
+        -file   => '>' . $pathName . "/$fileOutput",
         -format => 'fasta'
     );
+
+    my $seqio_outputU = Bio::SeqIO->new(
+                            -file   => '>' . $pathName . "/$fileUnknown",
+                            -format => 'fasta' );
 
     while ( my $pseq = $seqio->next_seq() ) {
 
@@ -114,20 +118,33 @@ sub searchInMLST {
         print "I will use database name is $NameDB\n";
 
         #get DB mlst name  and name profile
-        my ( $nameFrMlst, $DBname ) = connectMlst( $NameDB, $pseq );
-        my $AnnoMlst =  $nameFrMlst->{'locus'} . "-"
-                        . $nameFrMlst->{'id'}
-                        . "|DB $DBname ";
-        print "Name for annotate " . $AnnoMlst . "\n";
+        my ( $nameFrMlst, $DBname ,$foundMLST) = connectMlst( $NameDB ,$pseq);
+        
+        unless($foundMLST eq "found"){ 
+
+            my $seq_obj = Bio::Seq->new(
+                            -seq        => $pseq->seq(),
+                            -display_id => $pseq->display_id,
+                            -desc       => $pseq->desc ,
+                            -alphabet   => "dna");
+
+            $seqio_outputU->write_seq($seq_obj);
+
+
+        }else{
+            my $AnnoMlst =  $nameFrMlst->{'locus'} . "-"
+                            . $nameFrMlst->{'id'}
+                            . "|DB $DBname ";
+            print "Name for annotate " . $AnnoMlst . "\n";
 
         #Write file to Mlst<filename>.fasta
-        my $seq_obj = Bio::Seq->new(
-            -seq        => $pseq->seq(),
-            -display_id => $pseq->display_id,
-            -desc       => $pseq->desc . "|" . $AnnoMlst,
-            -alphabet   => "dna"
-        );
-        $seqio_output->write_seq($seq_obj);
+            my $seq_obj = Bio::Seq->new(
+                -seq        => $pseq->seq(),
+                -display_id => $pseq->display_id,
+                -desc       => $pseq->desc . "|" . $AnnoMlst,
+                -alphabet   => "dna" );
+            $seqio_output->write_seq($seq_obj);
+        }
     }
 }
 ##########~~~~~~~~~~~~~Main function~~~~~~~~~~~############
@@ -202,11 +219,11 @@ sub findNameDB {
 ###############################
 sub connectMlst {
     my $searchDBname  = $_[0];
-    my $pseq          = $_[1];
+    my $pseq        = $_[1];
     my @display_id  = split /-/, $pseq->display_id;
     my $locus = $display_id[0];
     my $sequnceSearch = $pseq->seq();
-
+    my $found;
 
     my $nameAllelic;
     my $database = $searchDBname;
@@ -214,13 +231,14 @@ sub connectMlst {
     if ( !$database ) {
         foreach my $DBname ( keys my %DBnamesHashB ) {
             $sequnceSearch = $DBname;
-            $nameAllelic = searchInPubMlstSOAP( $database, $sequnceSearch , $pseq);
+            ($nameAllelic,$found) = searchInPubMlstSOAP( $database, $sequnceSearch );
         }
     }
     else {
-        $nameAllelic = searchInPubMlstSOAP($database, $sequnceSearch);
+
+        ($nameAllelic,$found) = searchInPubMlstSOAP($database, $sequnceSearch);
     }
-    return $nameAllelic, $database;
+    return $nameAllelic, $database , $found;
 }
 
 
@@ -238,9 +256,10 @@ sub searchInPubMlstSOAP{
     my $pseq           =   $_[2];
     my $soap        = SOAP::Lite -> uri('http://pubmlst.org/MLST')
                                 ->proxy('http://pubmlst.org/cgi-bin/mlstdbnet/mlstFetch.pl');
-    
+     
     #return variable
     my $nameFromMlst;
+    my $foundMLST = "found";
     my $soapResponse = $soap->blast( $databaseName, $sequenceSearch, $numresults );
     unless ( $soapResponse->fault ) {
         for my $t ( $soapResponse->valueof('//blastMatch') ) {
@@ -254,8 +273,9 @@ sub searchInPubMlstSOAP{
                     . $t->{'alignment'} . '/'
                     . $t->{'length'}
                     . "\non  database name $database\n";
-            unless( $t->{'mismatches'} == 0 || $t->{'gaps'} == 0 || $t->{'alignment'} == $t->{'length'} ){
-                addUnknown($pseq);
+            if( $t->{'mismatches'} != 0 || $t->{'gaps'} != 0 || $t->{'alignment'} != $t->{'length'} ){
+                $foundMLST = "unfound";
+                last;
             }else{
                 $nameFromMlst = $t;    
                 last;
@@ -272,33 +292,27 @@ sub searchInPubMlstSOAP{
         print join ', ', $soapResponse->faultcode,
         $soapResponse->faultstring;
         }    
-    return $nameFromMlst;
+    return $nameFromMlst,$foundMLST;
 }
 
 
 sub addUnknown{
+    my $seqio_outputU = Bio::SeqIO->new(
+            -file   => ">../UserData/9/unknown.fasta",
+            -format => 'fasta' );
     my $pseq = $_[0];
     my $fileUnknown = $_[0]->{_fileUnknown};
     my $pathName  = $_[0]->{_pathName};
-    my $DFile     = $pathName . $fileUnknown;
-    print $pseq;
-
-    my $seqio_output;
-    unless( -e $DFile){
-        $seqio_output = Bio::SeqIO->new(
-            -file   => '>$DFile',
-            -format => 'fasta' );
-    }else{
-         my $seq_obj = Bio::Seq->new(
+    
+    
+    my $DFile     = "../UserData/9/unknown.fasta";#$pathName.$fileUnknown;
+    my $seq_obj = Bio::Seq->new(
             -seq        => $pseq->seq(),
             -display_id => $pseq->display_id,
             -desc       => $pseq->desc ,
-            -alphabet   => "dna"
-        );
+            -alphabet   => "dna");
 
-        $seqio_output->write_seq($seq_obj);
-    }
-
+    $seqio_outputU->write_seq($seq_obj);
     
 }
 
