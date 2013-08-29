@@ -8,32 +8,40 @@ use AssignUnknown;
 use warnings;
 use strict;
 
-#my $filename ='Unknown.fasta';
-#my $pathname = '../UserData/9/';
-my $mlstFile = 'knownMlst.fasta';
+# my $filename ='Unknown.fasta';
+# my $pathname = '../UserData/9/';
+my $mlstFile = "knownMlst.fasta";
+my $unknownFilename = "unknown.fasta";
+
 my $filename = $ARGV[0];
 my $pathname = $ARGV[1];
-# print 'first';
+my $isBacteria = $ARGV[2];
 
-my $IdentifySpe = IdentifySequence->new(
-				inputName 	=> 	$filename,
-				pathName 	=>	$pathname);
-$IdentifySpe->SearchBlast;
-$IdentifySpe->Annotate;
 
- my $IdentifyAllele = IdentifyAllele->new(
- 					inputName 	=> 	"annotateSpecies.fasta",
- 					pathName 	=>	$pathname,
- 					dblistName	=> "DBMlstUse.txt");
-$IdentifyAllele->searchInMLST;
+# my $IdentifySpe = IdentifySequence->new(
+# 				inputName 	=> 	$filename,
+# 				pathName 	=>	$pathname);
+# $IdentifySpe->SearchBlast;
+# $IdentifySpe->Annotate;
 
-# print "\n",'second';
+print $ARGV[2];
 
-unless (-e "..UserData/9/unknown.fasta"){
-	my $Unknownfile = AssignUnknown->new(inputName 	=> 	"unknown.fasta",
+unless($isBacteria eq "no"){
+	my $IdentifyAllele = IdentifyAllele->new(
+	 					inputName 	=> 	"annotateSpecies.fasta",
+	 					pathName 	=>	$pathname,
+	 					dblistName	=> "DBMlstUse.txt");
+	$IdentifyAllele->searchInMLST;
+}else{
+	$unknownFilename = "annotateSpecies.fasta";
+}
+
+if( (-e "$pathname$unknownFilename") || $isBacteria eq "no" ){
+
+	my $Unknownfile = AssignUnknown->new(inputName 	=> 	$unknownFilename,
 										pathName 	=>	$pathname);
 	$Unknownfile->createUnknown();
-	$Unknownfile->compoundFile("knownMlst.fasta");
+	$Unknownfile->compoundFile($mlstFile);
 	$mlstFile = 'MlstFile.fasta';
 }
 
