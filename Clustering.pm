@@ -45,36 +45,11 @@ sub set_fileOutCladogram {
 
 
 #this method want to argument parse string for make tree.
-sub makeTree{
+sub makePhylogeneticTree{
 	my $data = $_[0] -> {_inputCombine};
 	my $pathName = $_[0] -> {_pathName};
 	my $url2 = 'http://pubmlst.org/perl/mlstanalyse/mlstanalyse.pl';
-	# my $data = 'ST-11	2	3	4	3	8	4	6
-	# ST-1149	2	3	4	53	8	4	6
-	# ST-658	2	3	4	3	8	110	20
-	# ST-50	2	3	19	3	8	4	6
-	# ST-578	2	3	4	1	8	4	6
-	# ST-211	2	3	4	8	8	4	6
-	# ST-51	2	3	4	23	8	6	6
-	# ST-67	2	3	4	24	8	4	6
-	# ST-214	2	3	4	3	48	4	6
-	# ST-473	2	3	15	3	8	4	6
-	# ST-475	8	3	4	3	8	4	6
-	# ST-654	8	3	4	3	14	5	6
-	# ST-655	2	3	4	3	6	4	6
-	# ST-1026	2	3	4	3	8	4	7
-	# ST-1410	2	3	4	3	8	20	6
-	# ST-1789	150	3	4	3	8	4	6
-	# ST-2704	2	3	4	3	8	214	6
-	# ST-2962	2	3	4	3	8	4	21
-	# ST-2994	2	3	4	3	8	248	6
-	# ST-52	7	3	4	3	8	4	6
-	# ST-165	2	3	4	48	8	4	6
-	# ST-166	2	3	6	3	3	58	6
-	# ST-247	2	3	4	5	8	4	6
-	# ST-285	8	3	4	3	51	5	6
-	# ST-339	2	3	4	3	8	4	52
-	# ';
+
 	my %feildInput = ( 	'profiles' 	=> 	$data ,
 						'site' 		=> 	'pubmlst',
 						'page'		=> 	'treedraw',
@@ -141,7 +116,53 @@ sub make_PictureCladogram{
 	print "convert ".$paths."cladogram.eps ".$paths."treeprint.png\n";
 	}
 
+#########################
+##This method use for sendfile allelicProfile to program eburst through web.
+##argument 1 is file name allelicProfile
+##
+###########################
+sub makeEburst{
+	my $file = $_[1];
+	my $pathName = $_[0] -> {_pathName};
+	my $eburstUrl = 'http://eburst.mlst.net/v3/enter_data/file.asp?select=7';
+	
+	my $contentHtml = postFile_url( $eburstUrl, $file );
+	print $contentHtml;
+	my @searchJnlpLink = split 'class=navlink href="..' ,$contentHtml;
+	my @cutfile = split '"> Click' , $searchJnlpLink[1];
+	my $fileInWeb = $cutfile[0];
 
+	my $downloadLink = "http://eburst.mlst.net/v3/$fileInWeb";
+
+	downloadFile($downloadLink, "$pathName/burstFromEburst.jnlp");
+	
+}
+
+#################################
+##This method use for save file from txt
+##argument 1 is file for save.
+##argument 2 is pathname for save.
+##argument 3 is filename for save.
+################################
+sub save_file{
+	my $tree = $_[0];
+	my $paths = $_[1];
+	my $filename = $_[2];
+	my $path = ">".$paths.$filename;
+	#make file output to AlegicProfile formake tree.
+	open 	FH , $path or die "could not open \"$path\": $!";
+	print 	FH $tree;
+	close	(FH);
+	print $path,"\n";
+}
+
+
+############
+##This method use for send post method to web page use for upload file
+##argument 1 is url for downlad.
+##argument 2 is filename for upload.
+##Return Html code form request page
+########
 sub post_url {
 	my( $url, $formref ) = @_;
 
@@ -158,16 +179,48 @@ sub post_url {
 		return undef;
 	}
 }
-sub save_file{
-	my $tree = $_[0];
-	my $paths = $_[1];
-	my $filename = $_[2];
-	my $path = ">".$paths.$filename;
-	#make file output to AlegicProfile formake tree.
-	open 	FH , $path or die "could not open \"$path\": $!";
-	print 	FH $tree;
-	close	(FH);
-	print $path,"\n";
+
+############
+##This method use for send post method to web page use for upload file
+##argument 1 is url for downlad.
+##argument 2 is filename for upload.
+##Return Html code form request page
+########
+
+sub postFile_url{
+	my( $url, $file ) = @_;
+	my $ua = LWP::UserAgent->new;
+	$ua->timeout(300);
+	my $field_name = "FILE1";
+
+	my $response = $ua->post( $url,
+			Content_Type => 'form-data',
+			Content => [ $field_name => ["$file"] ,
+						'no_loci'	=>	'7',
+						'saveto'	=>	'disk',
+						'saveto'	=>	'database',]
+			);
+	return $response->content;
 }
+
+##############
+##This method use for download file frome link
+##argument 1 is url for downlad.
+##argument 2 is filename for save.
+#########
+sub downloadFile{
+	use LWP::Simple;
+	my ($url,$renameFile) = @_;
+	my $status = getstore($url, $renameFile);
+ 
+	if ( is_success($status) ){
+  		print "file downloaded correctly\n";
+	}
+	else
+	{
+  		print "error downloading file: $status\n";
+	}
+}
+
 
 1;
