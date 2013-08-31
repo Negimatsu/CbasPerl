@@ -127,7 +127,6 @@ sub makeEburst{
 	my $eburstUrl = 'http://eburst.mlst.net/v3/enter_data/file.asp?select=7';
 	
 	my $contentHtml = postFile_url( $eburstUrl, $file );
-	print $contentHtml;
 	my @searchJnlpLink = split 'class=navlink href="..' ,$contentHtml;
 	my @cutfile = split '"> Click' , $searchJnlpLink[1];
 	my $fileInWeb = $cutfile[0];
