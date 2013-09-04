@@ -1,0 +1,36 @@
+<jnlp
+spec="1.0+"
+codebase="http://eburst.mlst.net/jnlp"
+"href="../eBURST.jnlp">
+<information>
+<title>eBURST</title>
+  <vendor>Infectious Disease Epidemiology</vendor>
+  <homepage href="http://eburst.mlst.net"/>
+<description>eBURST</description>
+ <description kind="short">eBURST
+ </description>
+ <icon href="burst.gif"/>
+<offline-allowed/>
+ </information>
+ <security>
+ <all-permissions/>
+ </security>
+ <resources>
+   <j2se version="1.3+"/>
+   <jar href="eBurst.jar"  main="true"/>
+</resources>
+  <application-desc main-class="eBURST">
+  <argument>-g</argument>
+ <argument>7</argument>
+  <argument>-r</argument>
+ <argument>http://eburst.mlst.net/v3/tmp/tmp1/testburst.txt</argument>
+  <argument>-d</argument>
+  <argument>dgdg</argument>
+  <argument>-q</argument>
+  <argument>dgdg</argument>
+  <argument>-c</argument>
+  <argument>dgdgdf</argument>
+  <argument>-s</argument>
+  <argument>User entered data for eBURST</argument>
+</application-desc>
+   </jnlp>

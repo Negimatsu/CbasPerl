@@ -15,7 +15,8 @@ sub new {
         _inputName => $arg{inputName} || "no input filename",
         _pathName  => $arg{pathName}  || "No path name",
         _tree      => $arg{tree}      || "DBMlstUse",
-        _fileOutputCombine => "allelicProfile.txt"
+        _fileOutputCombine => "allelicProfile.txt",
+        _fileOutputCombineBurst => "allelicProfileBurst.txt"
     }, $class;
 
     return $self;
@@ -25,6 +26,7 @@ sub get_inputName         { $_[0]->{_inputName} }
 sub get_pathName          { $_[0]->{_pathName} }
 sub get_tree              { $_[0]->{_tree} }
 sub get_fileOutputCombine { $_[0]->{_fileOutputCombine} }
+sub get_fileOutputCombineBurst { $_[0]->{_fileOutputCombineBurst} }
 
 sub set_inputName {
     my ( $self, $inputName ) = @_;
@@ -44,6 +46,11 @@ sub set_tree {
 sub set_fileOutputCombine {
     my ( $self, $fileOutputCombine ) = @_;
     $self->{_fileOutputCombine} = $fileOutputCombine if $fileOutputCombine;
+}
+
+sub set_fileOutputCombineBurst {
+    my ( $self, $fileOutputCombineBurst ) = @_;
+    $self->{_fileOutputCombineBurst} = $fileOutputCombineBurst if $fileOutputCombineBurst;
 }
 
 sub makeCombineAllele {
@@ -92,24 +99,28 @@ sub makeCombineAllele {
         print $tree{$example}{ $genenum[0] }, "\n";
     }
     my $treein;
+    my $burstin="";
 
     # sort {$a <=> $b} is sort by number.
     foreach my $ex ( sort { $a <=> $b } keys %tree ) {
         print "name spe is $ex \n";
         $treein .= "$ex-$tree{$ex}{\"name\"}\t";
-
+        $burstin .= "$ex\t";
         foreach my $key ( sort keys $tree{$ex} ) {
             print "$key => $tree{$ex}{$key}\n";
             if ( $key eq 'name' ) {
                 next;
             }
             $treein .= "$tree{$ex}{$key}\t";
+            $burstin .= "$tree{$ex}{$key}\t";
         }
+        $burstin .= "\n";
         $treein .= "\n";
         print "\n";
     }
 
     makeTreeFile( $treein, $_[0]->{_pathName}, $_[0]->{_fileOutputCombine} );
+    makeTreeFile( $burstin, $_[0]->{_pathName}, $_[0]->{_fileOutputCombineBurst} );
 
     return $treein;
 
@@ -135,6 +146,6 @@ sub makeTreeFile {
     print FH $tree;
     close(FH);
     print $tree ;
-
 }
+
 1;

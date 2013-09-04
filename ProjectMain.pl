@@ -18,11 +18,11 @@ my $pathname = $ARGV[1];
 my $isBacteria = $ARGV[2];
 
 
-# my $IdentifySpe = IdentifySequence->new(
-# 				inputName 	=> 	$filename,
-# 				pathName 	=>	$pathname);
-# $IdentifySpe->SearchBlast;
-# $IdentifySpe->Annotate;
+my $IdentifySpe = IdentifySequence->new(
+ 				inputName 	=> 	$filename,
+ 				pathName 	=>	$pathname);
+$IdentifySpe->SearchBlast;
+$IdentifySpe->Annotate;
 
 print $ARGV[2];
 
@@ -52,6 +52,7 @@ my $combineOut = $combine->makeCombineAllele;
 my $cluster = Clustering->new (	inputCombine 	=> $combineOut,
 								pathName 	=> $pathname,
 								);
-my $tree = $cluster->makeTree;
+my $tree = $cluster->makePhylogeneticTree;
+$cluster->makeEburst("$pathname"."allelicProfileBurst.txt");
 
 1;
