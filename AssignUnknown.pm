@@ -12,7 +12,7 @@ sub new {
     my $self = bless {
         _inputName 			=> $arg{inputName} || "no input filename",
         _pathName  			=> $arg{pathName}  || "No path name",
-        _fileAssignUnknown 	=> "asgUknown.fasta",
+        _fileAssignUnknown 	=> "asgUnknown.fasta",
         _fielOuputCombine	=> "MlstFile.fasta"
     }, $class;
     return $self;

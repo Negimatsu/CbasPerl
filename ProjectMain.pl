@@ -11,12 +11,12 @@ use strict;
 # my $filename ='Unknown.fasta';
 # my $pathname = '../UserData/9/';
 my $mlstFile = "knownMlst.fasta";
+my $knownFile = "asgUknown.fasta";
 my $unknownFilename = "unknown.fasta";
 
 my $filename = $ARGV[0];
 my $pathname = $ARGV[1];
 my $isBacteria = $ARGV[2];
-
 
 my $IdentifySpe = IdentifySequence->new(
  				inputName 	=> 	$filename,
@@ -24,7 +24,7 @@ my $IdentifySpe = IdentifySequence->new(
 $IdentifySpe->SearchBlast;
 $IdentifySpe->Annotate;
 
-print $ARGV[2];
+
 
 unless($isBacteria eq "no"){
 	my $IdentifyAllele = IdentifyAllele->new(
@@ -36,7 +36,15 @@ unless($isBacteria eq "no"){
 	$unknownFilename = "annotateSpecies.fasta";
 }
 
-if( (-e "$pathname$unknownFilename") || $isBacteria eq "no" ){
+if ($isBacteria eq "no"){	
+	my $Unknownfile = AssignUnknown->new(inputName 	=> 	$unknownFilename,
+										pathName 	=>	$pathname);
+	$Unknownfile->createUnknown();
+	$mlstFile = "asgUnknown.fasta";	
+}
+
+if( (-e "$pathname$unknownFilename") ){
+	
 
 	my $Unknownfile = AssignUnknown->new(inputName 	=> 	$unknownFilename,
 										pathName 	=>	$pathname);
@@ -44,6 +52,7 @@ if( (-e "$pathname$unknownFilename") || $isBacteria eq "no" ){
 	$Unknownfile->compoundFile($mlstFile);
 	$mlstFile = 'MlstFile.fasta';
 }
+
 
 my $combine = CombineAllele->new(	inputName 	=> 	$mlstFile,
 									pathName 	=>	$pathname);
