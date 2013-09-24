@@ -10,6 +10,7 @@ use warnings;
 use Bio::Seq;
 use Bio::SeqIO;
 use Bio::SearchIO;
+use FindBin;
 # no warnings 'uninitialized';
 
 sub new {
@@ -154,7 +155,8 @@ sub searchInMLST {
 sub findNameDB {
 
     #get DB name from file DBMlstUse.txt
-    open( INFO, "DBMlstUse.txt" ) or die("Could not open  file.");
+    #open( INFO, '/home/ongkrab/MyProjectCbas/Deverlopment/codePerl/DBMlstUse.txt' ) or die("Could not open  file. $!");
+    open( INFO, "$FindBin::Bin/DBMlstUse.txt" ) or die("Could not open  file. $!");
     my %DBspeciHashB;
     my @DBnames;
     my $count = 0;
@@ -297,15 +299,16 @@ sub searchInPubMlstSOAP{
 
 
 sub addUnknown{
-    my $seqio_outputU = Bio::SeqIO->new(
-            -file   => ">../UserData/9/unknown.fasta",
-            -format => 'fasta' );
     my $pseq = $_[0];
     my $fileUnknown = $_[0]->{_fileUnknown};
     my $pathName  = $_[0]->{_pathName};
-    
-    
+
     my $DFile     = "../UserData/9/unknown.fasta";#$pathName.$fileUnknown;
+
+    my $seqio_outputU = Bio::SeqIO->new(
+            -file   => ">$DFile",
+            -format => 'fasta' );
+
     my $seq_obj = Bio::Seq->new(
             -seq        => $pseq->seq(),
             -display_id => $pseq->display_id,
