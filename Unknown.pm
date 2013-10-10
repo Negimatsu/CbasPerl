@@ -22,7 +22,6 @@ sub new{
 #Attribuite
 my %alleleHash = ();
 
-
 #########################################
 ##This method use for return allele name
 ## argument1 is allele name.
@@ -88,11 +87,6 @@ sub addSequenceHash{
 	$size++;
 	$alleleHash{$alleleName}{$sequence} = $name;
 	$alleleHash{$alleleName}{'size'} = $size;
-	
-	# while (($key, $value) = each $alleleHash{$alleleName})
-	# {
- #  		print "$key \n";#;is $alleleHash{$alleleName}{$key} years old\n";
-	# }
 }
 
 #########################################
@@ -105,10 +99,6 @@ sub getSequenceName{
 	my $sequence = $_[1];
 
 	return $alleleHash{$alleleName}{$sequence};
-}
-
-sub createFasta{
-
 }
 1; 
 

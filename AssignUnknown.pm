@@ -43,6 +43,12 @@ sub set_fielOuputCombine {
 	$self -> {_fielOuputCombine} = $fielOuputCombine if $fielOuputCombine;
 	}
 
+
+#################################
+##This method use for Create unknown 
+##file it use in Unknown package
+##for make clustering continue.
+################################
 sub createUnknown{
 	my $inputFile 	= $_[0] -> {_inputName};
 	my $pathName 	= $_[0] -> {_pathName};
@@ -85,6 +91,11 @@ sub createUnknown{
     }
 }
 
+#################################
+##This method use for compound file 
+##between known file and unknownfile
+##argument 1 is input file known .
+################################
 sub compoundFile{
 
 	my $inputFileKnown = $_[1];

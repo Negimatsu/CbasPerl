@@ -72,6 +72,9 @@ sub set_outputSpeciesfile {
 }
 
 
+#######################################
+##This method use for search in blast program form use input
+#######################################
 sub SearchBlast {
     my $inputName = $_[0]->{_inputName};
     my $pathName  = $_[0]->{_pathName};
@@ -166,7 +169,6 @@ sub SearchBlast {
 #argument 3 is percent identity from use
 #return file Anno<filename>.fasta
 ###############################
-
 sub Annotate {
 
     my $inputFile       = $_[0]->{_inputName};
@@ -175,10 +177,6 @@ sub Annotate {
     my $percentIdentity = $_[0]->{_percentIden};
     my $filnameeout     = $_[0]->{_outputSpeciesfile};
     my $anntateFileout  = $pathName.$filnameeout;
-
-
-    # inSeq is name file not have instance inputfile from user ;
-    #my $inputFile = 'est.txt';
 
     my @namefile = split /\./, $inputFile;
     my $inSeq    = $namefile[0];
@@ -217,9 +215,6 @@ sub Annotate {
                     " Percent_id=", $hsp->percent_identity,
                     " des=",        $hit->description, "\n";
 
-                #my $spec = $hit->description."";
-                #print $spec;
-                #name speicies , subsp. and strain is speci.
                 my @speci = split /,/, $hit->description . "";
                 my $species = $speci[0];
 

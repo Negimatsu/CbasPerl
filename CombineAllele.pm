@@ -5,10 +5,7 @@ use Bio::SeqIO;
 use Bio::SearchIO;
 use warnings;
 
-#my $tre = makeProfile('testfile.fasta');
-#makeTree($tre);
 #This method want to argument filein for filename input.
-
 sub new {
     my ( $class, %arg ) = @_;
     my $self = bless {
@@ -53,6 +50,10 @@ sub set_fileOutputCombineBurst {
     $self->{_fileOutputCombineBurst} = $fileOutputCombineBurst if $fileOutputCombineBurst;
 }
 
+
+#######################################
+##This method use for combine file for make allelic profile.
+#######################################
 sub makeCombineAllele {
     my $filein   = $_[0]->{_inputName};
     my $pathName = $_[0]->{_pathName};

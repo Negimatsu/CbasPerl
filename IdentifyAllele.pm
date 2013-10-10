@@ -78,7 +78,11 @@ my $header
     = "Pasteurella multocida subsp. multocida str. HN06, complete genome";
 
 my $numresults = 3;
+#####Sample arguments#########
 
+###########################################################
+#This method is main fucntion for search in mlst.
+###########################################################
 ##############~~~~~~~~~~~~~Main function~~~~~~~~~~~##################
 sub searchInMLST {
 
@@ -297,7 +301,10 @@ sub searchInPubMlstSOAP{
     return $nameFromMlst,$foundMLST;
 }
 
-
+#######################################
+##This method use for add unknown sequence to unknown file
+##argument 1 is unknown sequence for fasta format
+#######################################
 sub addUnknown{
     my $pseq = $_[0];
     my $fileUnknown = $_[0]->{_fileUnknown};

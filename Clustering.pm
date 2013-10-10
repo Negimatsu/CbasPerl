@@ -44,7 +44,10 @@ sub set_fileOutCladogram {
 	}	
 
 
-#this method want to argument parse string for make tree.
+#######################################
+##This method use for make phylogenetic from pubmlst
+##This method want to argument parse string for make tree.
+#######################################
 sub makePhylogeneticTree{
 	my $data = $_[0] -> {_inputCombine};
 	my $pathName = $_[0] -> {_pathName};
@@ -66,34 +69,19 @@ sub makePhylogeneticTree{
 	print $testtCluster[1],"\n";
 	print "\n";
 
-	#my $urlDown = "http://pubmlst.org/tmp/".$nametre[1];
-	
-	##print post_url( $url );
-	#my $tree = post_url( $urlDown)  ;
-	#print $tree;
-
 	my $tree =$testtCluster[1];
 	print $tree;
 	save_file($tree,$_[0] -> {_pathName},$_[0] -> {_filetreeCladogram}	);
 
 	make_PictureCladogram($tree,$_[0] -> {_pathName},$_[0] -> {_filePicCladogram});
-	
-	# use Bio::TreeIO;
-	# use IO::String;
+}
 
-	# my $io = IO::String->new($tree);
-	 
-	# my $in = new Bio::TreeIO(-fh => $io,
-	#                          -format => 'newick');
-	# my $out = new Bio::TreeIO(-file => '>mytree.svg',
-	#                           -format => 'svggraph');
-	# while( my $tree = $in->next_tree ) {
-	#     $out->write_tree($tree);
-	# }
-	
-	
-	}
-	
+#####################################
+##This method use for create file Cladogram through command line in Unix.
+##argument 1 is tree format (.tre).
+##argument 2 is pathfile for save.
+##argument 3 is file name for save.
+#######################################	
 sub make_PictureCladogram{
 	
 	my $tree 		= $_[0];
@@ -116,11 +104,11 @@ sub make_PictureCladogram{
 	print "convert ".$paths."cladogram.eps ".$paths."treeprint.png\n";
 	}
 
-#########################
+#####################################
 ##This method use for sendfile allelicProfile to program eburst through web.
 ##argument 1 is file name allelicProfile
 ##
-###########################
+#######################################
 sub makeEburst{
 	my $file = $_[1];
 	my $pathName = $_[0] -> {_pathName};
@@ -156,12 +144,12 @@ sub save_file{
 }
 
 
-############
+####################################
 ##This method use for send post method to web page use for upload file
 ##argument 1 is url for downlad.
 ##argument 2 is filename for upload.
 ##Return Html code form request page
-########
+################################
 sub post_url {
 	my( $url, $formref ) = @_;
 
@@ -179,13 +167,12 @@ sub post_url {
 	}
 }
 
-############
+####################################
 ##This method use for send post method to web page use for upload file
 ##argument 1 is url for downlad.
 ##argument 2 is filename for upload.
 ##Return Html code form request page
-########
-
+####################################
 sub postFile_url{
 	my( $url, $file ) = @_;
 	my $ua = LWP::UserAgent->new;
@@ -202,11 +189,11 @@ sub postFile_url{
 	return $response->content;
 }
 
-##############
+##########################################
 ##This method use for download file frome link
 ##argument 1 is url for downlad.
 ##argument 2 is filename for save.
-#########
+###########################################
 sub downloadFile{
 	use LWP::Simple;
 	my ($url,$renameFile) = @_;

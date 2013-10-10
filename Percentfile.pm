@@ -27,7 +27,9 @@ sub set_pathName {
     $self->{_pahtName} = $pathName if $pathName;
 }
 
-
+################################################
+##This method use for open file for follow process.
+###############################################
 sub open_file{
 	my $filename = $_[0]->{_inputName};
 	my $pathname = $_[0]->{_pathName};
@@ -37,6 +39,9 @@ sub open_file{
 	close FILE;
 }
 
+################################################
+##This method use for add line in for talk about proceess
+###############################################
 sub add_word{
 	my $word = $_[1];
 	my $percent = $_[2];
@@ -49,6 +54,9 @@ sub add_word{
 	close FILE;
 }
 
+########################################
+##Add line for finish process
+########################################
 sub add_done{
 	my $filename = $_[0]->{_inputName};
 	my $pathname = $_[0]->{_pathName};
@@ -57,9 +65,6 @@ sub add_done{
 	open FILE, ">>$Dfile" or die $!;
 	print FILE "done!|100|" ,localtime->strftime('%Y-%m-%d %H:%M:%S'),"\n";
 	close FILE;
-
-
-
 }
 
 1;
