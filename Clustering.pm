@@ -51,7 +51,7 @@ sub set_fileOutCladogram {
 sub makePhylogeneticTree{
 	my $data = $_[0] -> {_inputCombine};
 	my $pathName = $_[0] -> {_pathName};
-	my $url2 = 'http://pubmlst.org/perl/mlstanalyse/mlstanalyse.pl';
+	my $url2 = 'http://pubmlst.org/cgi-bin/mlstanalyse/mlstanalyse.pl';
 
 	my %feildInput = ( 	'profiles' 	=> 	$data ,
 						'site' 		=> 	'pubmlst',

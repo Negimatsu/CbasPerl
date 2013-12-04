@@ -29,10 +29,10 @@ $percent->add_word("A",5);
 my $IdentifySpe = IdentifySequence->new(
  				inputName 	=> 	$filename,
  				pathName 	=>	$pathname);
-$IdentifySpe->SearchBlast;
-$percent->add_word("B",35);
-$IdentifySpe->Annotate;
-$percent->add_word("C",45);
+# $IdentifySpe->SearchBlast;
+# $percent->add_word("B",35);
+# $IdentifySpe->Annotate;
+# $percent->add_word("C",45);
 
 unless($isBacteria eq "false"){
 	my $IdentifyAllele = IdentifyAllele->new(
