@@ -124,7 +124,7 @@ sub SearchBlast {
                     $factory->save_output($pathName . 'conBlast/' . $filename );
                     $factory->remove_rid($rid);
                     
-                    print "\nQuery Name: ", $result->query_name(), "\n";
+                    print "\nQuery Name : ", $result->query_name(), "\n";
 
                     while ( my $hit = $result->next_hit ) {
                         print $hit->description;
