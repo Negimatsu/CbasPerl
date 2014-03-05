@@ -169,7 +169,7 @@ sub findNameDB {
 
         $DBnamesHashB{ $liness[0] } = $liness[1];
         $DBspeciHashB{ $liness[1] } = $liness[0];
-        push( @DBnames, $liness[0] );
+        #push( @DBnames, $liness[0] );
 
         # if ($++counter == 2){
         # last;
@@ -179,27 +179,33 @@ sub findNameDB {
 
     ##############################
     my $check = $_[0];
-    my @nick = split / /, $check;
+    # my @nick = split / /, $check;
 
-    print "$nick[0]\n";
+    print "String is annotate $check\n";
 
     #Search Name DB from descripttion name blast;
     my $useSPname = "";
     my $pickName  = "";
     foreach my $SPname ( values %DBnamesHashB ) {
-        my @splitName = split / /, $SPname;
-        if ( $splitName[0] eq $nick[0] ) {
-            print "\n$splitName[0] and $nick[0]\n";
-            if ( $splitName[1] eq $nick[1] ) {
-                $useSPname = $DBspeciHashB{$SPname};
-                print "database name ", $useSPname, "\n";
-                last;
-            }
-            elsif ( $splitName[1] == "spp." ) {
-                $pickName = $DBspeciHashB{$SPname};
-                print $pickName;
-                next;
-            }
+        # my @splitName = split / /, $SPname;
+        # if ( $splitName[0] eq $nick[0] ) {
+        #     print "\n$splitName[0] and $nick[0]\n";
+        #     if ( $splitName[1] eq $nick[1] ) {
+        #         $useSPname = $DBspeciHashB{$SPname};
+        #         print "database name ", $useSPname, "\n";
+        #         last;
+        #     }
+        #     elsif ( $splitName[1] == "spp." ) {
+        #         $pickName = $DBspeciHashB{$SPname};
+        #         print $pickName;
+        #         next;
+        #     }
+        # }
+        my $resultSearhName = index($check,$SPname) ;
+        if ($resultSearhName >= 0 and $resultSearhName != -1 ){
+            $useSPname = $DBspeciHashB{$SPname};
+            print "Database name ", $useSPname, "\n";
+            last;
         }
     }
 
@@ -210,9 +216,9 @@ sub findNameDB {
     if ( ( $useSPname ne '' ) ) {
         $DBnameUseSearch = $useSPname;
     }
-    elsif ( $pickName ne "" ) {
-        $DBnameUseSearch = $pickName;
-    }
+    # elsif ( $pickName ne "" ) {
+    #     $DBnameUseSearch = $pickName;
+    # }
     return $DBnameUseSearch;
 }
 
@@ -310,7 +316,7 @@ sub addUnknown{
     my $fileUnknown = $_[0]->{_fileUnknown};
     my $pathName  = $_[0]->{_pathName};
 
-    my $DFile     = "../UserData/9/unknown.fasta";#$pathName.$fileUnknown;
+    my $DFile     = $pathName.$fileUnknown;#"../UserData/9/unknown.fasta";
 
     my $seqio_outputU = Bio::SeqIO->new(
             -file   => ">$DFile",
@@ -323,7 +329,6 @@ sub addUnknown{
             -alphabet   => "dna");
 
     $seqio_outputU->write_seq($seq_obj);
-    
 }
 
 1;
