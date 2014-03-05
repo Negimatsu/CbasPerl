@@ -105,7 +105,8 @@ sub makeCombineAllele {
     # sort {$a <=> $b} is sort by number.
     foreach my $ex ( sort { $a <=> $b } keys %tree ) {
         print "name spe is $ex \n";
-        $treein .= "$ex-$tree{$ex}{\"name\"}\t";
+        #$treein .= "$ex-$tree{$ex}{\"name\"}\t";
+        $treein .= "example-$ex\t";
         $burstin .= "$ex\t";
         foreach my $key ( sort keys $tree{$ex} ) {
             print "$key => $tree{$ex}{$key}\n";
