@@ -1,1 +1,9 @@
-tar xvfz 
+tar xvfz <fileNameLib>
+cd <fileNameLib>
+perl Makefile.PL
+sudo make
+make test
+make install
+
+
+if sudo Build installdeps

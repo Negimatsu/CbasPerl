@@ -29,7 +29,8 @@ $percent->add_word("A",5);
 my $IdentifySpe = IdentifySequence->new(
  				inputName 	=> 	$filename,
  				pathName 	=>	$pathname);
-$IdentifySpe->SearchBlast;
+# $IdentifySpe->SearchBlastFromNCBI;
+$IdentifySpe->SearchBlastFromLocalDB;
 $percent->add_word("B",35);
 $IdentifySpe->Annotate;
 $percent->add_word("C",45);

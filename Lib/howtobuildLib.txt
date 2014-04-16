@@ -6,4 +6,16 @@ make test
 make install
 
 
+
+fix bug 
+---------------------------------
+LWP edit can fix Remote::Blast module
+
+sudo apt-get install -f
+sudo apt-get update --fix-missing
+sudo apt-get install libwww-perl
+---------------------------------
+
+SOAP::Lite
+sudo apt-get install libsoap-lite-perl
 if sudo Build installdeps
