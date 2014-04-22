@@ -70,8 +70,7 @@ my $combine = CombineAllele->new(	inputName 	=> 	$mlstFile,
 my $combineOut = $combine->makeCombineAllele;
 $percent->add_word("H",85);
 my $cluster = Clustering->new (	inputCombine 	=> $combineOut,
-								pathName 	=> $pathname,
-								);
+								pathName 	=> $pathname);
 my $tree = $cluster->makePhylogeneticTree;
 $percent->add_word("I",95);
 $cluster->makeEburst("$pathname"."allelicProfileBurst.txt");
