@@ -47,7 +47,6 @@ unless($isBacteria eq "false"){
 	$percent->add_word("E",60);
 }
 
-
 if ($isBacteria eq "false"){	
 	my $Unknownfile = AssignUnknown->new(inputName 	=> 	$unknownFilename,
 										pathName 	=>	$pathname);

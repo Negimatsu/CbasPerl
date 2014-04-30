@@ -77,7 +77,7 @@ TCTGTCCCTGCTTTGATTGCACCACGCAACATATCACCCGTTGAAA';
 my $header
     = "Pasteurella multocida subsp. multocida str. HN06, complete genome";
 
-my $numresults = 3;
+my $numresults = 10;
 #####Sample arguments#########
 
 ###########################################################
@@ -120,29 +120,23 @@ sub searchInMLST {
         #Connect Mlst Database.
         #for search name database from species name
         my $NameDB = findNameDB($header);
-        print "I will use database name is $NameDB\n";
-
+        print "I will use database name is $NameDB\n". $NameDB." choose database name\n";
         #get DB mlst name  and name profile
         my ( $nameFrMlst, $DBname ,$foundMLST) = connectMlst( $NameDB ,$pseq);
-        
-        unless($foundMLST eq "found"){ 
 
+        unless($foundMLST eq "found"){ 
             my $seq_obj = Bio::Seq->new(
                             -seq        => $pseq->seq(),
                             -display_id => $pseq->display_id,
                             -desc       => $pseq->desc ,
                             -alphabet   => "dna");
-
             $seqio_outputU->write_seq($seq_obj);
-
-
         }else{
-            my $AnnoMlst =  $nameFrMlst->{'locus'} . "-"
-                            . $nameFrMlst->{'id'}
-                            . "|DB $DBname ";
-            print "Name for annotate " . $AnnoMlst . "\n";
+             #Write file to Mlst<filename>.fasta
+            my $AnnoMlst =  $nameFrMlst->{'locus'} . "-". $nameFrMlst->{'id'}. "|DB $DBname ";
+            print "Name for annotate " . $AnnoMlst . " \n";
 
-        #Write file to Mlst<filename>.fasta
+       
             my $seq_obj = Bio::Seq->new(
                 -seq        => $pseq->seq(),
                 -display_id => $pseq->display_id,
@@ -236,20 +230,22 @@ sub connectMlst {
     my $locus = $display_id[0];
     my $sequnceSearch = $pseq->seq();
     my $found;
-
+    my $locusUser = $display_id[-2];
     my $nameAllelic;
     my $database = $searchDBname;
-
+    print "2222222222222222222222222222222222222\n serch DB $database\n";
     if ( !$database ) {
         foreach my $DBname ( keys my %DBnamesHashB ) {
             $sequnceSearch = $DBname;
-            ($nameAllelic,$found) = searchInPubMlstSOAP( $database, $sequnceSearch );
+            ($nameAllelic,$found) = searchInPubMlstSOAP( $database, $sequnceSearch ,$locusUser);
         }
     }
     else {
 
-        ($nameAllelic,$found) = searchInPubMlstSOAP($database, $sequnceSearch);
+        ($nameAllelic,$found) = searchInPubMlstSOAP($database, $sequnceSearch, $locusUser);
     }
+
+    
     return $nameAllelic, $database , $found;
 }
 
@@ -259,16 +255,15 @@ sub connectMlst {
 #Implement from Keith Jolley
 #connect with pubmlst database 
 #argument 1 is name databasename in file DBmlstUse.txt Ex pmultocida_rirdc,Pasteurella multocida use pmultocida_rirdc
-#argument 2 is name Sequence for search
+#argument 2 is name sequence for search
 #argument 3 is fasta sequence for file have unknown.
 ###############################
 sub searchInPubMlstSOAP{
     my $databaseName   =   $_[0];
     my $sequenceSearch =   $_[1];
-    my $pseq           =   $_[2];
+    my $locusUser  =   $_[2];
     my $soap        = SOAP::Lite -> uri('http://pubmlst.org/MLST')
-                                ->proxy('http://pubmlst.org/cgi-bin/mlstdbnet/mlstFetch.pl');
-     
+                                ->proxy('http://pubmlst.org/cgi-bin/mlstdbnet/mlstFetch.pl');     
     #return variable
     my $nameFromMlst;
     my $foundMLST = "found";
@@ -276,34 +271,37 @@ sub searchInPubMlstSOAP{
     unless ( $soapResponse->fault ) {
         for my $t ( $soapResponse->valueof('//blastMatch') ) {
             print $t->{'locus'} . "-"
-                    . $t->{'id'}
-                    . ': Mismatches:'
-                    . $t->{'mismatches'}
-                    . '; Gaps:'
-                    . $t->{'gaps'}
-                    . '; Alignment '
-                    . $t->{'alignment'} . '/'
-                    . $t->{'length'}
-                    . "\non  database name $database\n";
-            if( $t->{'mismatches'} != 0 || $t->{'gaps'} != 0 || $t->{'alignment'} != $t->{'length'} ){
+                    . $t->{'id'}. ': Mismatches:'
+                    . $t->{'mismatches'}. '; Gaps:'
+                    . $t->{'gaps'}. '; Alignment '
+                    . $t->{'alignment'} . '/'. $t->{'length'}
+                    . "\n on  database name $databaseName\n";
+            
+            if( $t->{'mismatches'} != 0 || $t->{'gaps'} != 0 ){
                 $foundMLST = "unfound";
                 last;
             }else{
-                $nameFromMlst = $t;    
-                last;
-            }         
-            
-            }
+                $nameFromMlst = $t;
+                my $sequenceFromMlst =  get_Allele( $databaseName, $t->{'locus'}, $t->{'id'});                 
+
+                if ( ($sequenceFromMlst eq $sequenceSearch) && ($t->{'locus'} eq $locusUser) ){
+                    last;
+                }else{
+                    next;
+                }                                
+            }                 
+        }
         if ( !$soapResponse->valueof('//blastMatch') ) {
+            $foundMLST = "unfound";
             $nameFromMlst = "Unknown";
             print "This $database not found \n";
-            next;
+            # next;            
             }
         }
     else {
         print join ', ', $soapResponse->faultcode,
         $soapResponse->faultstring;
-        }    
+        }        
     return $nameFromMlst,$foundMLST;
 }
 
@@ -329,6 +327,24 @@ sub addUnknown{
             -alphabet   => "dna");
 
     $seqio_outputU->write_seq($seq_obj);
+}
+
+sub get_Allele{
+    my $database = $_[0];    
+    my $locus = $_[1];
+    my $allele = $_[2];
+    ##############################
+
+    my $soap = SOAP::Lite
+        -> uri('http://pubmlst.org/MLST')
+        -> proxy('http://pubmlst.org/cgi-bin/mlstdbnet/mlstFetch.pl');
+    my $soapResponse = $soap->getAlleleSequence($database,$locus,$allele);
+    unless ($soapResponse->fault){
+        print $soapResponse->result()."\n";
+    } else {
+        print join ', ',$soapResponse->faultcode,$soapResponse->faultstring;
+    } 
+    return $soapResponse->result();
 }
 
 1;

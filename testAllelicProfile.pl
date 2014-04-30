@@ -14,6 +14,15 @@ use strict;
 
 my $mlstFile = 'MlstFile.fasta';
 my $pathname = $ARGV[0];
-my $combine = CombineAllele->new(	inputName 	=> 	$mlstFile,
-									pathName 	=>	$pathname);
-my $combineOut = $combine->makeCombineAllele;
+
+my $IdentifyAllele = IdentifyAllele->new(
+	 					inputName 	=> 	"annotateSpecies.fasta",
+	 					pathName 	=>	$pathname,
+	 					dblistName	=> "DBMlstUse.txt");
+$IdentifyAllele->searchInMLST;
+
+
+# return 0;
+# my $combine = CombineAllele->new(	inputName 	=> 	$mlstFile,
+# 									pathName 	=>	$pathname);
+# my $combineOut = $combine->makeCombineAllele;

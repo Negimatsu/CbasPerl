@@ -142,7 +142,7 @@ sub makeCombineAllele {
         #$treein .= "$ex-$tree{$ex}{\"name\"}\t";
 
         if (scalar(keys $tree{$ex})  < $maxAllelic){
-            $errorAllelic .= "example-$ex";
+            $errorAllelic .= "example-$ex\t";
             
             foreach my $alleleHead ( @allAllele ){
                 # print "$alleleHead => $tree{$ex}{$alleleHead}\n" if exists $tree{$ex}{$alleleHead}; 
