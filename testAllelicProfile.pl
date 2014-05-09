@@ -9,17 +9,26 @@ use CombineAllele;
 use Clustering;
 use AssignUnknown;
 use Percentfile;
+use ValidateFasta;
 use warnings;
 use strict;
 
 my $mlstFile = 'MlstFile.fasta';
 my $pathname = $ARGV[0];
 
-my $IdentifyAllele = IdentifyAllele->new(
-	 					inputName 	=> 	"annotateSpecies.fasta",
-	 					pathName 	=>	$pathname,
-	 					dblistName	=> "DBMlstUse.txt");
-$IdentifyAllele->searchInMLST;
+my $check = ValidateFasta -> new(inputName 	=> 	"MlstFile.fasta",
+	 					pathName 	=>	$pathname);
+$check->check_file;
+
+
+# my $mlstFile = 'MlstFile.fasta';
+# my $pathname = $ARGV[0];
+
+# my $IdentifyAllele = IdentifyAllele->new(
+# 	 					inputName 	=> 	"annotateSpecies.fasta",
+# 	 					pathName 	=>	$pathname,
+# 	 					dblistName	=> "DBMlstUse.txt");
+# $IdentifyAllele->searchInMLST;
 
 
 # return 0;
